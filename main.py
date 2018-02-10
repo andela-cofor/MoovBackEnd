@@ -10,10 +10,10 @@ from flask_restful import Api, abort
 
 
 try:
-    from config.config import app_configuration
+    from config import app_configuration
     from api.v1.views.route import RouteResource
-except ModuleNotFoundError:
-    from moovbackend.config.config import app_configuration
+except ImportError:
+    from moovbackend.config import app_configuration
     from moovbackend.api.v1.views.route import RouteResource
 
 
@@ -28,7 +28,7 @@ def create_flask_app(environment):
 
     try:
         from api import models
-    except ModuleNotFoundError:
+    except ImportError:
         from moovbackend.api import models
 
     # to allow cross origin resource sharing
