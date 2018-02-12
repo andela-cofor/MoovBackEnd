@@ -12,9 +12,11 @@ from flask_restful import Api, abort
 try:
     from config import app_configuration
     from api.v1.views.route import RouteResource
+    from api.v1.views.user import UserSignupResource
 except ImportError:
     from moovbackend.config import app_configuration
     from moovbackend.api.v1.views.route import RouteResource
+    from moovbackend.api.v1.views.user import UserSignupResource
 
 
 dotenv_path = join(dirname(__file__), '.env')
@@ -58,6 +60,7 @@ def create_flask_app(environment):
     ## Actually setup the Api resource routing here
     ##
     api.add_resource(RouteResource, '/api/v1/route', '/api/v1/route/', endpoint='single_route')
+    api.add_resource(UserSignupResource, '/api/v1/signup', '/api/v1/signup/', endpoint='singup_user')
 
     # handle default 404 exceptions with a custom response
     @app.errorhandler(404)
