@@ -7,7 +7,11 @@ from sqlalchemy.orm import backref
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.types import JSON, TEXT, TypeDecorator
+from sqlalchemy import event
 from datetime import datetime
+
+from generator.id_generator import PushID
+
 
 class StringyJSON(TypeDecorator):
     """Stores and retrieves JSON as TEXT."""
@@ -129,3 +133,18 @@ class Notification(db.Model, ModelViewsMix):
 
     def __repr__(self):
         return '<Transaction %r %r>' % (self.message)
+
+
+def fancy_id_generator(mapper, connection, target):
+    '''
+    A function to generate unique identifiers on insert
+    '''
+    push_id = PushID()
+    target.id = push_id.next_id()
+
+# associate the listener function with models, to execute during the
+# "before_insert" event
+tables = [User, Wallet, Transaction, Notification]
+
+for table in tables:
+    event.listen(table, 'before_insert', fancy_id_generator)
