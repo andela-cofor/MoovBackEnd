@@ -3,7 +3,7 @@ import os
 import json
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import backref
+from sqlalchemy.orm import backref, relationship
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.types import JSON, TEXT, TypeDecorator
@@ -73,14 +73,16 @@ class User(db.Model, ModelViewsMix):
     image_url = db.Column(db.String)
     authorization_code = db.Column(db.String, unique=True)
     authorization_code_status = db.Column(db.Boolean, default=False)
-    wallet = db.relationship('Wallet', backref='user', lazy='dynamic')
-    transaction = db.relationship('Transaction', backref='user', lazy='dynamic')
-    notification = db.relationship('Notification', backref='user', lazy='dynamic')
+    wallet = db.relationship('Wallet', backref='user_wallet', lazy='dynamic')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
         return '<User %r %r>' % (self.firstname, self.lastname)
+
+    @classmethod
+    def is_user_data_taken(cls, email):
+       return db.session.query(db.exists().where(User.email==email)).scalar()
 
 
 class Wallet(db.Model, ModelViewsMix):
@@ -89,7 +91,6 @@ class Wallet(db.Model, ModelViewsMix):
 
     id = db.Column(db.String, primary_key=True)
     wallet_amount =  db.Column(db.Float, default=0.00)
-    transaction = db.relationship('Transaction', backref='wallet', lazy='dynamic')
     user_id = db.Column(db.String(), db.ForeignKey('User.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -111,8 +112,12 @@ class Transaction(db.Model, ModelViewsMix):
     paystack_deduction = db.Column(db.Float, default=0.00)
     user_id = db.Column(db.String(), db.ForeignKey('User.id'))
     sender_id = db.Column(db.String(), db.ForeignKey('User.id'))
+    user = relationship("User", foreign_keys=[user_id])
+    sender = relationship("User", foreign_keys=[sender_id])
     user_wallet_id = db.Column(db.String(), db.ForeignKey('Wallet.id'))
     sender_wallet_id = db.Column(db.String(), db.ForeignKey('Wallet.id'))
+    user_wallet = relationship("Wallet", foreign_keys=[user_wallet_id])
+    sender_wallet = relationship("Wallet", foreign_keys=[sender_wallet_id])
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -128,6 +133,8 @@ class Notification(db.Model, ModelViewsMix):
     message = db.Column(db.String)
     recipient_id = db.Column(db.String(), db.ForeignKey('User.id'))
     sender_id = db.Column(db.String(), db.ForeignKey('User.id'))
+    recipient = relationship("User", foreign_keys=[recipient_id])
+    sender = relationship("User", foreign_keys=[sender_id])
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
