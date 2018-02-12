@@ -10,7 +10,10 @@ from sqlalchemy.types import JSON, TEXT, TypeDecorator
 from sqlalchemy import event
 from datetime import datetime
 
-from generator.id_generator import PushID
+try:
+    from generator.id_generator import PushID
+except ImportError:
+    from moov_backend.api.generator.id_generator import PushID
 
 
 class StringyJSON(TypeDecorator):

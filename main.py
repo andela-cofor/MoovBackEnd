@@ -14,9 +14,9 @@ try:
     from api.v1.views.route import RouteResource
     from api.v1.views.user import UserSignupResource
 except ImportError:
-    from moovbackend.config import app_configuration
-    from moovbackend.api.v1.views.route import RouteResource
-    from moovbackend.api.v1.views.user import UserSignupResource
+    from moov_backend.config import app_configuration
+    from moov_backend.api.v1.views.route import RouteResource
+    from moov_backend.api.v1.views.user import UserSignupResource
 
 
 dotenv_path = join(dirname(__file__), '.env')
@@ -31,7 +31,7 @@ def create_flask_app(environment):
     try:
         from api import models
     except ImportError:
-        from moovbackend.api import models
+        from moov_backend.api import models
 
     # to allow cross origin resource sharing
     CORS(app)
